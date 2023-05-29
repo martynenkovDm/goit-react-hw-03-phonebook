@@ -28,13 +28,30 @@ export default class App extends Component {
     filter: '',
   };
 
+  componentDidMount() {
+    const contactFromLs = localStorage.getItem('contacts');
+    const parcedContacts = JSON.parse(contactFromLs);
+    if (parcedContacts) {
+      this.setState({ contacts: parcedContacts });
+    }
+  }
+
+  componentDidUpdate(prevProp, prevState) {
+    if (this.state.contacts !== prevState.contacts) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+  }
+}
+
   addContact = newContact => {
-    this.state.contacts.find(
+    const { contacts } = this.state;
+    contacts.some(
       contact =>
         contact.name.toLowerCase().trim() ===
           newContact.name.toLowerCase().trim() ||
-        contact.number.trim() === newContact.number.trim()
-    )? toast.error(`${newContact.name}: is already in contacts`, notifyOptions)
+        contact.number.trim() ===
+          newContact.number.trim()
+    )
+      ? toast.error(`${newContact.name}: is already in contacts`, notifyOptions)
       : this.setState(prevState => {  
           return {
             contacts: [newContact, ...prevState.contacts],
@@ -59,6 +76,7 @@ export default class App extends Component {
   getVisibleContacts = () => {
     const { filter, contacts } = this.state;
     const normalizedFilter = filter.toLowerCase();
+
     return contacts.filter(contact =>
       contact.name.toLowerCase().includes(normalizedFilter)
     );
